@@ -63,7 +63,7 @@ NOTIFICATION = {
     'failed'    : TT('Job failed'),              #: Message class for Growl server
     'warning'   : TT('Warning'),                 #: Message class for Growl server
     'error'     : TT('Error'),                   #: Message class for Growl server
-    'disk-full' : TT('Disk full, paused'),       #: Message class for Growl server
+    'disk-full' : TT('Disk full'),               #: Message class for Growl server
     'queue-done': TT('Queue finished'),          #: Message class for Growl server
     'other'     : TT('Other Messages')           #: Message class for Growl server
 }

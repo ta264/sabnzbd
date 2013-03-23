@@ -233,6 +233,17 @@
                     </select>
                 </div>
                 <div class="field-pair">
+                    <label class="config" for="prowl_prio_queue_done">$T($notify_texts['queue-done'])</label>
+                    <select name="prowl_prio_queue_done" id="prowl_prio_queue_done">
+                        <option value="-3" <!--#if $prowl_prio_queue_done == -3 then 'selected="selected" class="selected"' else ""#--> >$T('prowl-off')</option>
+                        <option value="-2" <!--#if $prowl_prio_queue_done == -2 then 'selected="selected" class="selected"' else ""#--> >$T('prowl-very-low')</option>
+                        <option value="-1" <!--#if $prowl_prio_queue_done == -1 then 'selected="selected" class="selected"' else ""#--> >$T('prowl-moderate')</option>
+                        <option value="0"  <!--#if $prowl_prio_queue_done == 0  then 'selected="selected" class="selected"' else ""#--> >$T('prowl-normal')</option>
+                        <option value="1"  <!--#if $prowl_prio_queue_done == 1  then 'selected="selected" class="selected"' else ""#--> >$T('prowl-high')</option>
+                        <option value="2"  <!--#if $prowl_prio_queue_done == 2  then 'selected="selected" class="selected"' else ""#--> >$T('prowl-emergency')</option>
+                    </select>
+                </div>
+                <div class="field-pair alt">
                     <label class="config" for="prowl_prio_disk_full">$T($notify_texts['disk-full'])</label>
                     <select name="prowl_prio_disk_full" id="prowl_prio_disk_full">
                         <option value="-3" <!--#if $prowl_prio_disk_full == -3 then 'selected="selected" class="selected"' else ""#--> >$T('prowl-off')</option>
@@ -243,7 +254,7 @@
                         <option value="2"  <!--#if $prowl_prio_disk_full == 2  then 'selected="selected" class="selected"' else ""#--> >$T('prowl-emergency')</option>
                     </select>
                </div>
-                <div class="field-pair alt">
+                <div class="field-pair">
                     <label class="config" for="prowl_prio_warning">$T($notify_texts['warning'])</label>
                     <select name="prowl_prio_warning" id="prowl_prio_warning">
                         <option value="-3" <!--#if $prowl_prio_warning == -3 then 'selected="selected" class="selected"' else ""#--> >$T('prowl-off')</option>
@@ -254,7 +265,7 @@
                         <option value="2"  <!--#if $prowl_prio_warning == 2  then 'selected="selected" class="selected"' else ""#--> >$T('prowl-emergency')</option>
                     </select>
                 </div>
-                <div class="field-pair">
+                <div class="field-pair alt">
                     <label class="config" for="prowl_prio_error">$T($notify_texts['error'])</label>
                     <select name="prowl_prio_error" id="prowl_prio_error">
                         <option value="-3" <!--#if $prowl_prio_error == -3 then 'selected="selected" class="selected"' else ""#--> >$T('prowl-off')</option>
@@ -263,17 +274,6 @@
                         <option value="0"  <!--#if $prowl_prio_error == 0  then 'selected="selected" class="selected"' else ""#--> >$T('prowl-normal')</option>
                         <option value="1"  <!--#if $prowl_prio_error == 1  then 'selected="selected" class="selected"' else ""#--> >$T('prowl-high')</option>
                         <option value="2"  <!--#if $prowl_prio_error == 2  then 'selected="selected" class="selected"' else ""#--> >$T('prowl-emergency')</option>
-                    </select>
-                </div>
-                <div class="field-pair alt">
-                    <label class="config" for="prowl_prio_queue_done">$T($notify_texts['queue-done'])</label>
-                    <select name="prowl_prio_queue_done" id="prowl_prio_queue_done">
-                        <option value="-3" <!--#if $prowl_prio_queue_done == -3 then 'selected="selected" class="selected"' else ""#--> >$T('prowl-off')</option>
-                        <option value="-2" <!--#if $prowl_prio_queue_done == -2 then 'selected="selected" class="selected"' else ""#--> >$T('prowl-very-low')</option>
-                        <option value="-1" <!--#if $prowl_prio_queue_done == -1 then 'selected="selected" class="selected"' else ""#--> >$T('prowl-moderate')</option>
-                        <option value="0"  <!--#if $prowl_prio_queue_done == 0  then 'selected="selected" class="selected"' else ""#--> >$T('prowl-normal')</option>
-                        <option value="1"  <!--#if $prowl_prio_queue_done == 1  then 'selected="selected" class="selected"' else ""#--> >$T('prowl-high')</option>
-                        <option value="2"  <!--#if $prowl_prio_queue_done == 2  then 'selected="selected" class="selected"' else ""#--> >$T('prowl-emergency')</option>
                     </select>
                 </div>
                 <div class="field-pair">
