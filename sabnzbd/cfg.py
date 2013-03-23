@@ -24,7 +24,7 @@ import sabnzbd
 from sabnzbd.constants import DEF_HOST, DEF_PORT_WIN_SSL, DEF_PORT_WIN, DEF_STDINTF, \
                               DEF_DOWNLOAD_DIR, DEF_NZBBACK_DIR, DEF_PORT_UNIX_SSL, \
                               NORMAL_PRIORITY, DEF_SCANRATE, DEF_PORT_UNIX, DEF_COMPLETE_DIR, \
-                              DEF_ADMIN_DIR, NOTIFY_KEYS
+                              DEF_ADMIN_DIR, DEF_NOTIFY_KEYS
 from sabnzbd.config import OptionBool, OptionNumber, OptionPassword, \
                            OptionDir, OptionStr, OptionList, no_nonsense, \
                            validate_octal, validate_safedir, validate_dir_exists, \
@@ -232,7 +232,9 @@ growl_password = OptionPassword('growl', 'growl_password')
 growl_enable = OptionBool('growl', 'growl_enable', not sabnzbd.DARWIN_ML)
 ntfosd_enable = OptionBool('growl', 'ntfosd_enable', not sabnzbd.WIN32 and not sabnzbd.DARWIN)
 ncenter_enable = OptionBool('growl', 'ncenter_enable', sabnzbd.DARWIN)
-notify_classes = OptionList('growl', 'notify_classes', NOTIFY_KEYS)
+notify_classes = OptionList('growl', 'notify_classes', DEF_NOTIFY_KEYS)
+growl_classes = OptionList('growl', 'growl_classes', DEF_NOTIFY_KEYS)
+osd_classes = OptionList('growl', 'osd_classes', DEF_NOTIFY_KEYS)
 prowl_enable = OptionBool('growl', 'prowl_enable', False)
 prowl_apikey = OptionStr('growl', 'prowl_apikey')
 prowl_prio_startup = OptionNumber('growl', 'prowl_prio_startup', -3)
@@ -240,6 +242,10 @@ prowl_prio_download = OptionNumber('growl', 'prowl_prio_download', -3)
 prowl_prio_pp = OptionNumber('growl', 'prowl_prio_pp', -3)
 prowl_prio_complete = OptionNumber('growl', 'prowl_prio_complete', -3)
 prowl_prio_failed = OptionNumber('growl', 'prowl_prio_failed', -3)
+prowl_prio_disk_full = OptionNumber('growl', 'prowl_prio_disk_full', -3)
+prowl_prio_warning = OptionNumber('growl', 'prowl_prio_warning', -3)
+prowl_prio_error = OptionNumber('growl', 'prowl_prio_error', -3)
+prowl_prio_queue_done = OptionNumber('growl', 'prowl_prio_queue_done', -3)
 prowl_prio_other = OptionNumber('growl', 'prowl_prio_other', -3)
 
 quota_size = OptionStr('misc', 'quota_size')

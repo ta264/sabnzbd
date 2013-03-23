@@ -23,7 +23,7 @@ from __future__ import with_statement
 import os.path
 import logging
 import socket
-import urllib
+import urllib2
 import time
 import subprocess
 from threading import Thread
@@ -56,12 +56,16 @@ except:
 # Define translatable message table
 TT = lambda x:x
 NOTIFICATION = {
-    'startup'  : TT('Startup/Shutdown'),        #: Message class for Growl server
-    'download' : TT('Added NZB'),               #: Message class for Growl server
-    'pp'       : TT('Post-processing started'), #: Message class for Growl server
-    'complete' : TT('Job finished'),            #: Message class for Growl server
-    'failed'   : TT('Job failed'),              #: Message class for Growl server
-    'other'    : TT('Other Messages')           #: Message class for Growl server
+    'startup'   : TT('Startup/Shutdown'),        #: Message class for Growl server
+    'download'  : TT('Added NZB'),               #: Message class for Growl server
+    'pp'        : TT('Post-processing started'), #: Message class for Growl server
+    'complete'  : TT('Job finished'),            #: Message class for Growl server
+    'failed'    : TT('Job failed'),              #: Message class for Growl server
+    'warning'   : TT('Warning'),                 #: Message class for Growl server
+    'error'     : TT('Error'),                   #: Message class for Growl server
+    'disk-full' : TT('Disk full, paused'),       #: Message class for Growl server
+    'queue-done': TT('Queue finished'),          #: Message class for Growl server
+    'other'     : TT('Other Messages')           #: Message class for Growl server
 }
 
 #------------------------------------------------------------------------------
@@ -105,35 +109,32 @@ def have_ntfosd():
 
 
 #------------------------------------------------------------------------------
-def send_notification(title , msg, gtype, wait=False):
+def send_notification(title , msg, gtype):
     """ Send Notification message
-        Return '' when OK, otherwise an error string
     """
-    res = []
-    if gtype in sabnzbd.cfg.notify_classes() or wait:
+    # Notification Center
+    if gtype in sabnzbd.cfg.notify_classes():
         if sabnzbd.DARWIN_ML and sabnzbd.cfg.ncenter_enable():
-            res.append(send_notification_center(title, msg, gtype))
-        if sabnzbd.cfg.growl_enable():
-            if _HAVE_CLASSIC_GROWL and not sabnzbd.cfg.growl_server():
-                return send_local_growl(title, msg, gtype)
-            else:
-                if wait:
-                    res.append(send_growl(title, msg, gtype))
-                else:
-                    res.append('ok')
-                    Thread(target=send_growl, args=(title, msg, gtype)).start()
-                    time.sleep(0.5)
-        if have_ntfosd():
-            res.append(send_notify_osd(title, msg))
-        if sabnzbd.cfg.prowl_enable() and sabnzbd.cfg.prowl_apikey():
-            if wait:
-                res.append(send_prowl(title, msg, gtype, True))
-            else:
-                res.append('ok')
-                Thread(target=send_prowl, args=(title, msg, gtype)).start()
-                time.sleep(0.5)
+            send_notification_center(title, msg, gtype)
+    
+    # Growl
+    if sabnzbd.cfg.growl_enable() and gtype in sabnzbd.cfg.growl_classes():
+        if _HAVE_CLASSIC_GROWL and not sabnzbd.cfg.growl_server():
+            return send_local_growl(title, msg, gtype)
+        else:
+            Thread(target=send_growl, args=(title, msg, gtype)).start()
+            time.sleep(0.5)
+    
+    # Prowl
+    if sabnzbd.cfg.prowl_enable():
+        if sabnzbd.cfg.prowl_apikey():
+            Thread(target=send_prowl, args=(title, msg, gtype)).start()
+            time.sleep(0.5)
+    
+    # OSD
+    if have_ntfosd() and gtype in sabnzbd.cfg.osd_classes():
+        res.append(send_notify_osd(title, msg))
 
-    return ' / '.join([r for r in res if r])
 
 #------------------------------------------------------------------------------
 def reset_growl():
@@ -265,30 +266,32 @@ if _HAVE_CLASSIC_GROWL:
 #------------------------------------------------------------------------------
 # Ubuntu NotifyOSD Support
 #
-if _HAVE_NTFOSD:
-    _NTFOSD = False
-    def send_notify_osd(title, message):
-        """ Send a message to NotifyOSD
-        """
-        global _NTFOSD
-        error = 'NotifyOSD not working'
-        if sabnzbd.cfg.ntfosd_enable():
-            icon = os.path.join(sabnzbd.DIR_PROG, 'sabnzbd.ico')
-            _NTFOSD = _NTFOSD or pynotify.init('icon-summary-body')
-            if _NTFOSD:
-                logging.info('Send to NotifyOSD: %s / %s', title, message)
-                try:
-                    note = pynotify.Notification(title, message, icon)
-                    note.show()
-                except:
-                    # Apparently not implemented on this system
-                    logging.info(error)
-                    return error
-                return None
-            else:
+_NTFOSD = False
+def send_notify_osd(title, message):
+    """ Send a message to NotifyOSD
+    """
+    global _NTFOSD
+    if not _HAVE_NTFOSD:
+        return T('Not available') #: Function is not available on this OS
+
+    error = 'NotifyOSD not working'
+    if sabnzbd.cfg.ntfosd_enable():
+        icon = os.path.join(sabnzbd.DIR_PROG, 'sabnzbd.ico')
+        _NTFOSD = _NTFOSD or pynotify.init('icon-summary-body')
+        if _NTFOSD:
+            logging.info('Send to NotifyOSD: %s / %s', title, message)
+            try:
+                note = pynotify.Notification(title, message, icon)
+                note.show()
+            except:
+                # Apparently not implemented on this system
+                logging.info(error)
                 return error
+            return None
         else:
-            return 'Not enabled'
+            return error
+    else:
+        return T('Not enabled') #: Function is not enabled
 
 
 def ncenter_path():
@@ -301,6 +304,8 @@ def ncenter_path():
 
 def send_notification_center(title, msg, gtype):
     """ Send message to Mountain Lion's Notification Center """
+    if not sabnzbd.DARWIN_ML:
+        return T('Not available') #: Function is not available on this OS
     tool = ncenter_path()    
     if tool:
         try:
@@ -339,8 +344,9 @@ def send_prowl(title, msg, gtype, force=False):
     """ Send message to Prowl """
     
     apikey = sabnzbd.cfg.prowl_apikey()
-    title = urllib.quote(title.encode('utf8'))
-    msg = urllib.quote(msg.encode('utf8'))
+    title = Tx(NOTIFICATION.get(gtype, 'other'))
+    title = urllib2.quote(title.encode('utf8'))
+    msg = urllib2.quote(msg.encode('utf8'))
     prio = -3
 
     if gtype == 'startup' :  prio = sabnzbd.cfg.prowl_prio_startup()
@@ -348,17 +354,21 @@ def send_prowl(title, msg, gtype, force=False):
     if gtype == 'pp' :       prio = sabnzbd.cfg.prowl_prio_pp()
     if gtype == 'complete' : prio = sabnzbd.cfg.prowl_prio_complete()
     if gtype == 'failed' :   prio = sabnzbd.cfg.prowl_prio_failed()
-    if gtype == 'other' :    prio = sabnzbd.cfg.prowl_prio_other()
+    if gtype == 'disk-full': prio = sabnzbd.cfg.prowl_prio_disk_full()
+    if gtype == 'warning':   prio = sabnzbd.cfg.prowl_prio_warning()
+    if gtype == 'error':     prio = sabnzbd.cfg.prowl_prio_error()
+    if gtype == 'queue-done': prio = sabnzbd.cfg.prowl_prio_queue_done()
+    if gtype == 'other':     prio = sabnzbd.cfg.prowl_prio_other()
     if force: prio = 0
     
     if prio > -3:
         url = 'https://api.prowlapp.com/publicapi/add?apikey=%s&application=SABnzbd' \
               '&event=%s&description=%s&priority=%d' % (apikey, title, msg, prio)
         try:
-            urllib.urlopen(url)
+            urllib2.urlopen(url)
             return ''
         except:
             logging.warning('Failed to send Prowl message')
             logging.info("Traceback: ", exc_info = True)
-            return 'Failed to send Prowl message'
+            return T('Failed to send Prowl message')
     return ''

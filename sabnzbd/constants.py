@@ -162,4 +162,5 @@ class Status():
     RUNNING = 'Running'
     VERIFYING = 'Verifying'
 
-NOTIFY_KEYS = ('startup', 'download', 'pp', 'complete', 'failed', 'other')
+NOTIFY_KEYS = ('startup', 'download', 'pp', 'complete', 'failed', 'disk-full', 'warning', 'error', 'queue-done', 'other')
+DEF_NOTIFY_KEYS = ('startup', 'complete', 'failed', 'disk-full')
