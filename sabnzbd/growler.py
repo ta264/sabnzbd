@@ -23,6 +23,7 @@ from __future__ import with_statement
 import os.path
 import logging
 import socket
+import urllib
 import time
 import subprocess
 from threading import Thread
@@ -31,6 +32,7 @@ import sabnzbd
 import sabnzbd.cfg
 from sabnzbd.encoding import unicoder, latin1
 from sabnzbd.constants import NOTIFY_KEYS
+
 from gntp import GNTPRegister
 from gntp.notifier import GrowlNotifier
 try:
@@ -58,6 +60,7 @@ NOTIFICATION = {
     'download' : TT('Added NZB'),               #: Message class for Growl server
     'pp'       : TT('Post-processing started'), #: Message class for Growl server
     'complete' : TT('Job finished'),            #: Message class for Growl server
+    'failed'   : TT('Job failed'),              #: Message class for Growl server
     'other'    : TT('Other Messages')           #: Message class for Growl server
 }
 
@@ -122,6 +125,13 @@ def send_notification(title , msg, gtype, wait=False):
                     time.sleep(0.5)
         if have_ntfosd():
             res.append(send_notify_osd(title, msg))
+        if sabnzbd.cfg.prowl_enable() and sabnzbd.cfg.prowl_apikey():
+            if wait:
+                res.append(send_prowl(title, msg, gtype, True))
+            else:
+                res.append('ok')
+                Thread(target=send_prowl, args=(title, msg, gtype)).start()
+                time.sleep(0.5)
 
     return ' / '.join([r for r in res if r])
 
@@ -323,3 +333,32 @@ def hostname(host=True):
         return '@%s' % sys_name.lower()
     else:
         return ''
+
+#------------------------------------------------------------------------------
+def send_prowl(title, msg, gtype, force=False):
+    """ Send message to Prowl """
+    
+    apikey = sabnzbd.cfg.prowl_apikey()
+    title = urllib.quote(title.encode('utf8'))
+    msg = urllib.quote(msg.encode('utf8'))
+    prio = -3
+
+    if gtype == 'startup' :  prio = sabnzbd.cfg.prowl_prio_startup()
+    if gtype == 'download' : prio = sabnzbd.cfg.prowl_prio_download()
+    if gtype == 'pp' :       prio = sabnzbd.cfg.prowl_prio_pp()
+    if gtype == 'complete' : prio = sabnzbd.cfg.prowl_prio_complete()
+    if gtype == 'failed' :   prio = sabnzbd.cfg.prowl_prio_failed()
+    if gtype == 'other' :    prio = sabnzbd.cfg.prowl_prio_other()
+    if force: prio = 0
+    
+    if prio > -3:
+        url = 'https://api.prowlapp.com/publicapi/add?apikey=%s&application=SABnzbd' \
+              '&event=%s&description=%s&priority=%d' % (apikey, title, msg, prio)
+        try:
+            urllib.urlopen(url)
+            return ''
+        except:
+            logging.warning('Failed to send Prowl message')
+            logging.info("Traceback: ", exc_info = True)
+            return 'Failed to send Prowl message'
+    return ''

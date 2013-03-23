@@ -2551,7 +2551,10 @@ LIST_EMAIL = (
     'email_server', 'email_to', 'email_from',
     'email_account', 'email_pwd', 'email_dir', 'email_rss'
 )
-LIST_GROWL = ('growl_enable', 'growl_server', 'growl_password', 'ntfosd_enable', 'ncenter_enable')
+LIST_GROWL = ('growl_enable', 'growl_server', 'growl_password', 'ntfosd_enable',
+              'ncenter_enable',
+              'prowl_enable', 'prowl_apikey',
+              'prowl_prio_startup', 'prowl_prio_download', 'prowl_prio_pp', 'prowl_prio_complete', 'prowl_prio_failed', 'prowl_prio_other')
 
 class ConfigNotify(object):
     def __init__(self, web_dir, root, prim):
@@ -2580,6 +2583,13 @@ class ConfigNotify(object):
         conf['notify_list'] = NOTIFY_KEYS
         conf['notify_classes'] = cfg.notify_classes.get_string()
         conf['notify_texts'] = sabnzbd.growler.NOTIFICATION
+
+        conf['prowl_prio_startup'] = cfg.prowl_prio_startup()
+        conf['prowl_prio_pp'] = cfg.prowl_prio_pp()
+        conf['prowl_prio_download'] = cfg.prowl_prio_download()
+        conf['prowl_prio_complete'] = cfg.prowl_prio_complete()
+        conf['prowl_prio_failed'] = cfg.prowl_prio_failed()
+        conf['prowl_prio_other'] = cfg.prowl_prio_other()
 
         template = Template(file=os.path.join(self.__web_dir, 'config_notify.tmpl'),
                             filter=FILTER, searchList=[conf], compilerSettings=DIRECTIVES)

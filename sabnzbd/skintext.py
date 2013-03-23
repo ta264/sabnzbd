@@ -70,6 +70,13 @@ SKIN_TEXT = {
     'sch-resume_all_normal':TT('Resume normal prioirty jobs'), #: Config->Scheduler
     'sch-resume_all_high': TT('Resume high prioirty jobs'), #: Config->Scheduler
 
+    'prowl-off'          : TT('Off'), #: Prowl priority
+    'prowl-very-low'     : TT('Very Low'), #: Prowl priority
+    'prowl-moderate'     : TT('Moderate'), #: Prowl priority
+    'prowl-normal'       : TT('Normal'), #: Prowl priority
+    'prowl-high'         : TT('High'), #: Prowl priority
+    'prowl-emergency'    : TT('Emergency'), #: Prowl priority
+
 # General texts
     'default' : TT('Default'), #: Default value, used in dropdown menus
     'none' : TT('None'), #: No value, used in dropdown menus
@@ -575,6 +582,10 @@ SKIN_TEXT = {
     'opt-notify_classes' : TT('Notification classes'),
     'explain-notify_classes' : TT('Enable classes of messages to be reported (none, one or multiple)'),
     'testNotify' : TT('Test Notification'),
+    'opt-prowl_enable' : TT('Enable Prowl notifications'), #: Prowl settings
+    'explain-prowl_enable' : TT('Requires a Prowl account'), #: Prowl settings
+    'opt-prowl_apikey' : TT('API key for Prowl'), #: Prowl settings
+    'explain-prowl_apikey' : TT('Personal API key for Prowl (required)'), #: Prowl settings
 
 # Config->Cat
     'configCat' : TT('User-defined categories'),
