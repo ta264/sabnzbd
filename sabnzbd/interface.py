@@ -2592,6 +2592,10 @@ class ConfigNotify(object):
         conf['prowl_prio_download'] = cfg.prowl_prio_download()
         conf['prowl_prio_complete'] = cfg.prowl_prio_complete()
         conf['prowl_prio_failed'] = cfg.prowl_prio_failed()
+        conf['prowl_prio_disk_full'] = cfg.prowl_prio_disk_full()
+        conf['prowl_prio_warning'] = cfg.prowl_prio_warning()
+        conf['prowl_prio_error'] = cfg.prowl_prio_error()
+        conf['prowl_prio_queue_done'] = cfg.prowl_prio_queue_done()
         conf['prowl_prio_other'] = cfg.prowl_prio_other()
 
         template = Template(file=os.path.join(self.__web_dir, 'config_notify.tmpl'),
