@@ -583,7 +583,7 @@ SKIN_TEXT = {
     'explain-notify_classes' : TT('Enable classes of messages to be reported (none, one or multiple)'),
     'testNotify' : TT('Test Notification'),
     'section-NC' : TT('Notification Center'), #: Header for OSX Notfication Center section
-    'section-OSD' : TT('OSD'), #: Header for Ubuntu's OSD notifications section
+    'section-OSD' : TT('NotifyOSD'), #: Header for Ubuntu's NotifyOSD notifications section
     'section-Prowl' : TT('Prowl'), #: Header for Prowl notification section
     'opt-prowl_enable' : TT('Enable Prowl notifications'), #: Prowl settings
     'explain-prowl_enable' : TT('Requires a Prowl account'), #: Prowl settings

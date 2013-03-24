@@ -2551,11 +2551,13 @@ LIST_EMAIL = (
     'email_server', 'email_to', 'email_from',
     'email_account', 'email_pwd', 'email_dir', 'email_rss'
 )
-LIST_GROWL = ('growl_enable', 'growl_server', 'growl_password', 'ntfosd_enable',
-              'ncenter_enable',
-              'prowl_enable', 'prowl_apikey',
+LIST_GROWL = ('growl_enable', 'growl_server', 'growl_password')
+LIST_NCENTER = ('ncenter_enable',)
+LIST_NTFOSD = ('ntfosd_enable', )
+LIST_PROWL = ('prowl_enable', 'prowl_apikey',
               'prowl_prio_startup', 'prowl_prio_download', 'prowl_prio_pp', 'prowl_prio_complete', 'prowl_prio_failed',
-              'prowl_prio_disk_full', 'prowl_prio_warning', 'prowl_prio_error', 'prowl_prio_queue_done', 'prowl_prio_other')
+              'prowl_prio_disk_full', 'prowl_prio_warning', 'prowl_prio_error', 'prowl_prio_queue_done', 'prowl_prio_other'
+             )
 
 class ConfigNotify(object):
     def __init__(self, web_dir, root, prim):
@@ -2581,10 +2583,16 @@ class ConfigNotify(object):
             conf[kw] = config.get_config('misc', kw).get_string()
         for kw in LIST_GROWL:
             conf[kw] = config.get_config('growl', kw).get_string()
+        for kw in LIST_PROWL:
+            conf[kw] = config.get_config('prowl', kw).get_string()
+        for kw in LIST_NCENTER:
+            conf[kw] = config.get_config('ncenter', kw).get_string()
+        for kw in LIST_NTFOSD:
+            conf[kw] = config.get_config('ntfosd', kw).get_string()
         conf['notify_list'] = NOTIFY_KEYS
-        conf['notify_classes'] = cfg.notify_classes.get_string()
+        conf['ncenter_classes'] = cfg.ncenter_classes.get_string()
         conf['growl_classes'] = cfg.growl_classes.get_string()
-        conf['osd_classes'] = cfg.osd_classes.get_string()
+        conf['ntfosd_classes'] = cfg.ntfosd_classes.get_string()
         conf['notify_texts'] = sabnzbd.growler.NOTIFICATION
 
         conf['prowl_prio_startup'] = cfg.prowl_prio_startup()
@@ -2615,9 +2623,9 @@ class ConfigNotify(object):
             msg = config.get_config('growl', kw).set(platform_encode(kwargs.get(kw)))
             if msg:
                 return badParameterResponse(T('Incorrect value for %s: %s') % (kw, unicoder(msg)))
-        cfg.notify_classes.set(kwargs.get('notify_classes', ''))
+        cfg.ncenter_classes.set(kwargs.get('ncenter_classes', ''))
         cfg.growl_classes.set(kwargs.get('growl_classes', ''))
-        cfg.osd_classes.set(kwargs.get('osd_classes', ''))
+        cfg.ntfosd_classes.set(kwargs.get('ntfosd_classes', ''))
 
         config.save_config()
         self.__lastmail = None

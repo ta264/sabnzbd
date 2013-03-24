@@ -117,10 +117,10 @@
                     <span class="desc">$T('explain-ncenter_enable')</span>
                 </div>
                 <div class="field-pair alt">
-                   <label class="config" for="notify_classes">$T('opt-notify_classes')</label>
-                   <select name="notify_classes" multiple="multiple" class="multiple_cats">
+                   <label class="config" for="ncenter_classes">$T('opt-notify_classes')</label>
+                   <select name="ncenter_classes" multiple="multiple" class="multiple_cats">
                        <!--#for $item in $notify_list#-->
-                           <option value="$item" <!--#if $item in $notify_classes then 'selected="selected"' else ""#--> >$T($notify_texts[$item])</option>
+                           <option value="$item" <!--#if $item in $ncenter_classes then 'selected="selected"' else ""#--> >$T($notify_texts[$item])</option>
                        <!--#end for#-->
                    </select>
                    <span class="desc">$T('explain-notify_classes')</span>
@@ -145,10 +145,10 @@
                     <span class="desc">$T('explain-ntfosd_enable')</span>
                 </div>
                 <div class="field-pair alt">
-                   <label class="config" for="osd_classes">$T('opt-notify_classes')</label>
-                   <select name="osd_classes" multiple="multiple" class="multiple_cats">
+                   <label class="config" for="ntfosd_classes">$T('opt-notify_classes')</label>
+                   <select name="ntfosd_classes" multiple="multiple" class="multiple_cats">
                        <!--#for $item in $notify_list#-->
-                           <option value="$item" <!--#if $item in $osd_classes then 'selected="selected"' else ""#--> >$T($notify_texts[$item])</option>
+                           <option value="$item" <!--#if $item in $ntfosd_classes then 'selected="selected"' else ""#--> >$T($notify_texts[$item])</option>
                        <!--#end for#-->
                    </select>
                    <span class="desc">$T('explain-notify_classes')</span>

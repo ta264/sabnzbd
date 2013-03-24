@@ -113,7 +113,7 @@ def send_notification(title , msg, gtype):
     """ Send Notification message
     """
     # Notification Center
-    if gtype in sabnzbd.cfg.notify_classes():
+    if gtype in sabnzbd.cfg.ncenter_classes():
         if sabnzbd.DARWIN_ML and sabnzbd.cfg.ncenter_enable():
             send_notification_center(title, msg, gtype)
     
@@ -131,8 +131,8 @@ def send_notification(title , msg, gtype):
             Thread(target=send_prowl, args=(title, msg, gtype)).start()
             time.sleep(0.5)
     
-    # OSD
-    if have_ntfosd() and gtype in sabnzbd.cfg.osd_classes():
+    # NTFOSD
+    if have_ntfosd() and gtype in sabnzbd.cfg.ntfosd_classes():
         send_notify_osd(title, msg)
 
 
