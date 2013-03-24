@@ -2551,9 +2551,18 @@ LIST_EMAIL = (
     'email_server', 'email_to', 'email_from',
     'email_account', 'email_pwd', 'email_dir', 'email_rss'
 )
-LIST_GROWL = ('growl_enable', 'growl_server', 'growl_password')
-LIST_NCENTER = ('ncenter_enable',)
-LIST_NTFOSD = ('ntfosd_enable', )
+LIST_GROWL = ('growl_enable', 'growl_server', 'growl_password',
+              'growl_prio_startup', 'growl_prio_download', 'growl_prio_pp', 'growl_prio_complete', 'growl_prio_failed',
+              'growl_prio_disk_full', 'growl_prio_warning', 'growl_prio_error', 'growl_prio_queue_done', 'growl_prio_other'
+              )
+LIST_NCENTER = ('ncenter_enable',
+                'ncenter_prio_startup', 'ncenter_prio_download', 'ncenter_prio_pp', 'ncenter_prio_complete', 'ncenter_prio_failed',
+                'ncenter_prio_disk_full', 'ncenter_prio_warning', 'ncenter_prio_error', 'ncenter_prio_queue_done', 'ncenter_prio_other'
+                )
+LIST_NTFOSD = ('ntfosd_enable',
+               'ntfosd_prio_startup', 'ntfosd_prio_download', 'ntfosd_prio_pp', 'ntfosd_prio_complete', 'ntfosd_prio_failed',
+               'ntfosd_prio_disk_full', 'ntfosd_prio_warning', 'ntfosd_prio_error', 'ntfosd_prio_queue_done', 'ntfosd_prio_other'
+               )
 LIST_PROWL = ('prowl_enable', 'prowl_apikey',
               'prowl_prio_startup', 'prowl_prio_download', 'prowl_prio_pp', 'prowl_prio_complete', 'prowl_prio_failed',
               'prowl_prio_disk_full', 'prowl_prio_warning', 'prowl_prio_error', 'prowl_prio_queue_done', 'prowl_prio_other'
@@ -2580,31 +2589,19 @@ class ConfigNotify(object):
         conf['have_ncenter'] = sabnzbd.DARWIN_ML and bool(sabnzbd.growler.ncenter_path())
 
         for kw in LIST_EMAIL:
-            conf[kw] = config.get_config('misc', kw).get_string()
+            conf[kw] = config.get_config('misc', kw)()
         for kw in LIST_GROWL:
-            conf[kw] = config.get_config('growl', kw).get_string()
+            try:
+                conf[kw] = config.get_config('growl', kw)()
+            except:
+                logging.debug('MISSING KW=%s', kw)
         for kw in LIST_PROWL:
-            conf[kw] = config.get_config('prowl', kw).get_string()
+            conf[kw] = config.get_config('prowl', kw)()
         for kw in LIST_NCENTER:
-            conf[kw] = config.get_config('ncenter', kw).get_string()
+            conf[kw] = config.get_config('ncenter', kw)()
         for kw in LIST_NTFOSD:
-            conf[kw] = config.get_config('ntfosd', kw).get_string()
-        conf['notify_list'] = NOTIFY_KEYS
-        conf['ncenter_classes'] = cfg.ncenter_classes.get_string()
-        conf['growl_classes'] = cfg.growl_classes.get_string()
-        conf['ntfosd_classes'] = cfg.ntfosd_classes.get_string()
+            conf[kw] = config.get_config('ntfosd', kw)()
         conf['notify_texts'] = sabnzbd.growler.NOTIFICATION
-
-        conf['prowl_prio_startup'] = cfg.prowl_prio_startup()
-        conf['prowl_prio_pp'] = cfg.prowl_prio_pp()
-        conf['prowl_prio_download'] = cfg.prowl_prio_download()
-        conf['prowl_prio_complete'] = cfg.prowl_prio_complete()
-        conf['prowl_prio_failed'] = cfg.prowl_prio_failed()
-        conf['prowl_prio_disk_full'] = cfg.prowl_prio_disk_full()
-        conf['prowl_prio_warning'] = cfg.prowl_prio_warning()
-        conf['prowl_prio_error'] = cfg.prowl_prio_error()
-        conf['prowl_prio_queue_done'] = cfg.prowl_prio_queue_done()
-        conf['prowl_prio_other'] = cfg.prowl_prio_other()
 
         template = Template(file=os.path.join(self.__web_dir, 'config_notify.tmpl'),
                             filter=FILTER, searchList=[conf], compilerSettings=DIRECTIVES)
@@ -2623,9 +2620,18 @@ class ConfigNotify(object):
             msg = config.get_config('growl', kw).set(platform_encode(kwargs.get(kw)))
             if msg:
                 return badParameterResponse(T('Incorrect value for %s: %s') % (kw, unicoder(msg)))
-        cfg.ncenter_classes.set(kwargs.get('ncenter_classes', ''))
-        cfg.growl_classes.set(kwargs.get('growl_classes', ''))
-        cfg.ntfosd_classes.set(kwargs.get('ntfosd_classes', ''))
+        for kw in LIST_NCENTER:
+            msg = config.get_config('ncenter', kw).set(platform_encode(kwargs.get(kw)))
+            if msg:
+                return badParameterResponse(T('Incorrect value for %s: %s') % (kw, unicoder(msg)))
+        for kw in LIST_NTFOSD:
+            msg = config.get_config('ntfosd', kw).set(platform_encode(kwargs.get(kw)))
+            if msg:
+                return badParameterResponse(T('Incorrect value for %s: %s') % (kw, unicoder(msg)))
+        for kw in LIST_PROWL:
+            msg = config.get_config('prowl', kw).set(platform_encode(kwargs.get(kw)))
+            if msg:
+                return badParameterResponse(T('Incorrect value for %s: %s') % (kw, unicoder(msg)))
 
         config.save_config()
         self.__lastmail = None

@@ -17,6 +17,7 @@
 #
 """
 sabnzbd.growler - Send notifications to Growl
+
 """
 #------------------------------------------------------------------------------
 from __future__ import with_statement
@@ -63,8 +64,8 @@ NOTIFICATION = {
     'failed'    : TT('Job failed'),              #: Message class for Growl server
     'warning'   : TT('Warning'),                 #: Message class for Growl server
     'error'     : TT('Error'),                   #: Message class for Growl server
-    'disk-full' : TT('Disk full'),               #: Message class for Growl server
-    'queue-done': TT('Queue finished'),          #: Message class for Growl server
+    'disk_full' : TT('Disk full'),               #: Message class for Growl server
+    'queue_done': TT('Queue finished'),          #: Message class for Growl server
     'other'     : TT('Other Messages')           #: Message class for Growl server
 }
 
@@ -109,16 +110,24 @@ def have_ntfosd():
 
 
 #------------------------------------------------------------------------------
+def check_classes(gtype, section):
+    """ Check if `gtype` is enabled in `section` """
+    try:
+        return sabnzbd.config.get_config(section, '%s_prio_%s' % (section, gtype))()
+    except TypeError:
+        logging.debug('Incorrect Notify option %s:%s_prio_%s', section, section, gtype)
+
+#------------------------------------------------------------------------------
 def send_notification(title , msg, gtype):
     """ Send Notification message
     """
     # Notification Center
-    if gtype in sabnzbd.cfg.ncenter_classes():
-        if sabnzbd.DARWIN_ML and sabnzbd.cfg.ncenter_enable():
+    if sabnzbd.DARWIN_ML and sabnzbd.cfg.ncenter_enable():
+        if check_classes(gtype, 'ncenter'):
             send_notification_center(title, msg, gtype)
     
     # Growl
-    if sabnzbd.cfg.growl_enable() and gtype in sabnzbd.cfg.growl_classes():
+    if sabnzbd.cfg.growl_enable() and check_classes(gtype, 'growl'):
         if _HAVE_CLASSIC_GROWL and not sabnzbd.cfg.growl_server():
             return send_local_growl(title, msg, gtype)
         else:
@@ -132,7 +141,7 @@ def send_notification(title , msg, gtype):
             time.sleep(0.5)
     
     # NTFOSD
-    if have_ntfosd() and gtype in sabnzbd.cfg.ntfosd_classes():
+    if have_ntfosd() and check_classes(gtype, 'ntfosd'):
         send_notify_osd(title, msg)
 
 
@@ -357,7 +366,7 @@ def send_prowl(title, msg, gtype, force=False):
     if gtype == 'disk-full': prio = sabnzbd.cfg.prowl_prio_disk_full()
     if gtype == 'warning':   prio = sabnzbd.cfg.prowl_prio_warning()
     if gtype == 'error':     prio = sabnzbd.cfg.prowl_prio_error()
-    if gtype == 'queue-done': prio = sabnzbd.cfg.prowl_prio_queue_done()
+    if gtype == 'queue_done': prio = sabnzbd.cfg.prowl_prio_queue_done()
     if gtype == 'other':     prio = sabnzbd.cfg.prowl_prio_other()
     if force: prio = 0
     
