@@ -133,7 +133,7 @@ def send_notification(title , msg, gtype):
     
     # OSD
     if have_ntfosd() and gtype in sabnzbd.cfg.osd_classes():
-        res.append(send_notify_osd(title, msg))
+        send_notify_osd(title, msg)
 
 
 #------------------------------------------------------------------------------
