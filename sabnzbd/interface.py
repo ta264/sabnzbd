@@ -2589,7 +2589,7 @@ class ConfigNotify(object):
         conf['have_ncenter'] = sabnzbd.DARWIN_ML and bool(sabnzbd.growler.ncenter_path())
 
         for kw in LIST_EMAIL:
-            conf[kw] = config.get_config('misc', kw)()
+            conf[kw] = config.get_config('misc', kw).get_string()
         for kw in LIST_GROWL:
             try:
                 conf[kw] = config.get_config('growl', kw)()
