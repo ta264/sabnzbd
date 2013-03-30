@@ -140,7 +140,7 @@
         <div class="col2">
             <h3>$T('section-NC')</h3>
         </div><!-- /col2 -->
-        <div class="col1">
+        <div class="col1" <!--#if $have_ncenter then '' else 'style="display:none;"'#-->">
             <fieldset>
                 <div class="field-pair <!--#if not $have_ncenter then "disabled" else "" #-->">
                     <label class="config" for="ncenter_enable">$T('opt-ncenter_enable')</label>
@@ -199,7 +199,7 @@
         <div class="col2">
             <h3>$T('section-OSD')</h3>
         </div><!-- /col2 -->
-        <div class="col1">
+        <div class="col1" <!--#if $have_ntfosd then '' else 'style="display:none;"'#-->">
             <fieldset>
                 <div class="field-pair alt <!--#if not $have_ntfosd then "disabled" else "" #-->">
                     <label class="config" for="ntfosd_enable">$T('opt-ntfosd_enable')</label>
