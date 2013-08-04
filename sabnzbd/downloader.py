@@ -27,7 +27,6 @@ from nntplib import NNTPPermanentError
 import socket
 import random
 from urllib import urlopen
-import urllib2
 
 import sabnzbd
 from sabnzbd.decorators import synchronized, synchronized_CV, CV
@@ -209,7 +208,7 @@ class Downloader(Thread):
         self.paused = state
 
     def check_resume(self):
-        result = urllib2.urlopen("http://jwandrews.co.uk/sab/share.php?person=tom&action=nzbadd").read()
+        result = urlopen("http://jwandrews.co.uk/sab/share.php?person=tom&action=nzbadd").read()
 
         if result == "ok":      #we can start downloading
             logging.info("Resuming - status ok")
