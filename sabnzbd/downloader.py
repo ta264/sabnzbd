@@ -205,7 +205,10 @@ class Downloader(Thread):
     @synchronized_CV
     def set_paused_state(self, state):
         """ Set Downloader to specified paused state """
-        self.paused = state
+        if state == False && self.check_resume():
+            self.paused = False
+        else:
+            self.paused = True
 
     def check_resume(self):
         result = urlopen("http://jwandrews.co.uk/sab/share.php?person=tom&action=nzbadd").read()
