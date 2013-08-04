@@ -131,7 +131,9 @@ class Downloader(Thread):
         self.paused = paused
 
         self.status_person = cfg.status_person()
+        self.status_url = cfg.status_url()
         logging.info("Status person: " + self.status_person)
+        logging.info("Status url: " + self.status_url)
 
         #used for throttling bandwidth and scheduling bandwidth changes
         self.bandwidth_limit = cfg.bandwidth_limit()
@@ -206,7 +208,7 @@ class Downloader(Thread):
         return primary
 
     def check_resume(self):
-        result = urlopen("http://jwandrews.co.uk/sab/share.php?person=" + self.status_person + "&action=nzbadd").read()
+        result = urlopen(self.status_url + "?person=" + self.status_person + "&action=nzbadd").read()
 
         if result == "ok":      #we can start downloading
             logging.info("Resuming - status ok")
@@ -217,7 +219,7 @@ class Downloader(Thread):
 
     def set_paused(self):
         logging.info("Setting status to paused")
-        urlopen("http://jwandrews.co.uk/sab/share.php?person=" + self.status_person + "&action=stop").read()
+        urlopen(self.status_url + "?person=" + self.status_person + "&action=stop").read()
 
     @synchronized_CV
     def set_paused_state(self, state):
