@@ -308,6 +308,8 @@ SKIN_TEXT = {
     'explain-rss_rate' : TT('Checking interval (in minutes, at least 15). Not active when you use the Scheduler!'),
     'opt-bandwidth_limit' : TT('Download Speed Limit'),
     'explain-bandwidth_limit' : TT('Download rate limit (in KB/s - kilobytes per second).'),
+    'opt-status_person' : TT('Person for status'),
+    'explain-status_person' : TT('Person downloading'),
     'opt-cache_limitstr' : TT('Article Cache Limit'),
     'explain-cache_limitstr' : TT('Cache articles in memory to reduce disk access.<br /><i>In bytes, optionally follow with K,M,G. For example: "64M" or "128M"</i>'),
     'opt-cleanup_list' : TT('Cleanup List'),

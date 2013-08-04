@@ -130,7 +130,8 @@ class Downloader(Thread):
         # Used for scheduled pausing
         self.paused = paused
 
-        self.status_person = "tom"
+        self.status_person = cfg.status_person()
+        logging.info("Status person: " + self.status_person)
 
         #used for throttling bandwidth and scheduling bandwidth changes
         self.bandwidth_limit = cfg.bandwidth_limit()
