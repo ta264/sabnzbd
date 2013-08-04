@@ -129,6 +129,9 @@ class Downloader(Thread):
 
         self.status_person = cfg.status_person()
         self.status_url = cfg.status_url()
+        self.status_waiting = False
+        self.status_last_poll = 0
+        self.status_poll_interval = 10 * 60
         logging.info("Status person: " + self.status_person)
         logging.info("Status url: " + self.status_url)
 
@@ -212,14 +215,24 @@ class Downloader(Thread):
 
         if result == "ok":      #we can start downloading
             logging.info("Resuming - status ok")
+            self.status_waiting = False
             return True
         
-        logging.info("Resume not allowed")
+        logging.info("Resume not allowed - will poll...")
+        self.status_waiting = True
+        self.status_last_poll = time.time()
+
         return False
+
+    def poll_resume(self):
+        if time.time() - self.status_last_poll > self.status_poll_interval:
+            logging.info("Polling resume status")
+            self.resume()
 
     def set_paused(self):
         logging.info("Setting status to paused")
         urlopen(self.status_url + "?person=" + self.status_person + "&action=stop").read()
+        self.status_waiting = False
 
     @synchronized_CV
     def set_paused_state(self, state):
@@ -252,7 +265,6 @@ class Downloader(Thread):
                 sabnzbd.save_state()
 
             self.set_paused()
-
 
     @synchronized_CV
     def delay(self):
@@ -359,6 +371,10 @@ class Downloader(Thread):
                         continue
 
                 assert isinstance(server, Server)
+
+                if self.status_waiting:
+                    self.poll_resume()
+
                 if not server.idle_threads or server.restart or self.is_paused() or self.shutdown or self.delayed or self.postproc:
                     continue
 
