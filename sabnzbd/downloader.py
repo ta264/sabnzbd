@@ -26,6 +26,8 @@ from threading import Thread, RLock
 from nntplib import NNTPPermanentError
 import socket
 import random
+from urllib import urlopen
+import urllib2
 
 import sabnzbd
 from sabnzbd.decorators import synchronized, synchronized_CV, CV
@@ -206,10 +208,21 @@ class Downloader(Thread):
         """ Set Downloader to specified paused state """
         self.paused = state
 
+    def check_resume(self):
+        result = urllib2.urlopen("http://jwandrews.co.uk/sab/share.php?person=tom&action=nzbadd").read()
+
+        if result == "ok":      #we can start downloading
+            logging.info("Resuming - status ok")
+            return True
+        
+        logging.info("Resume not allowed")
+        return False
+
     @synchronized_CV
     def resume(self):
-        logging.info("Resuming")
-        self.paused = False
+        logging.info("Resuming - checking status")
+        if self.check_resume():
+            self.paused = False
 
     @synchronized_CV
     def pause(self, save=True):
@@ -225,6 +238,9 @@ class Downloader(Thread):
                 self.disconnect()
             if save:
                 sabnzbd.save_state()
+
+            logging.info("Setting status")
+            urlopen("http://jwandrews.co.uk/sab/share.php?person=tom&action=stop").read()
 
     @synchronized_CV
     def delay(self):
