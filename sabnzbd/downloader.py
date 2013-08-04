@@ -127,13 +127,13 @@ class Downloader(Thread):
 
         logging.debug("Initializing downloader/decoder")
 
-        # Used for scheduled pausing
-        self.paused = paused
-
         self.status_person = cfg.status_person()
         self.status_url = cfg.status_url()
         logging.info("Status person: " + self.status_person)
         logging.info("Status url: " + self.status_url)
+
+        # Used for scheduled pausing
+        self.set_paused_state(paused)
 
         #used for throttling bandwidth and scheduling bandwidth changes
         self.bandwidth_limit = cfg.bandwidth_limit()
