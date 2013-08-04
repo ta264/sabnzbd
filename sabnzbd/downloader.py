@@ -202,14 +202,6 @@ class Downloader(Thread):
 
         return primary
 
-    @synchronized_CV
-    def set_paused_state(self, state):
-        """ Set Downloader to specified paused state """
-        if state == False && self.check_resume():
-            self.paused = False
-        else:
-            self.paused = True
-
     def check_resume(self):
         result = urlopen("http://jwandrews.co.uk/sab/share.php?person=tom&action=nzbadd").read()
 
@@ -220,9 +212,22 @@ class Downloader(Thread):
         logging.info("Resume not allowed")
         return False
 
+    def set_paused(self):
+        logging.info("Setting status to paused")
+        urlopen("http://jwandrews.co.uk/sab/share.php?person=tom&action=stop").read()
+
+    @synchronized_CV
+    def set_paused_state(self, state):
+        """ Set Downloader to specified paused state """
+        if state == False and self.check_resume():
+            self.paused = False
+        else:
+            self.paused = True
+            self.set_paused()
+
     @synchronized_CV
     def resume(self):
-        logging.info("Resuming - checking status")
+        logging.info("Resuming")
         if self.check_resume():
             self.paused = False
 
@@ -241,8 +246,8 @@ class Downloader(Thread):
             if save:
                 sabnzbd.save_state()
 
-            logging.info("Setting status")
-            urlopen("http://jwandrews.co.uk/sab/share.php?person=tom&action=stop").read()
+            self.set_paused()
+
 
     @synchronized_CV
     def delay(self):
