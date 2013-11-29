@@ -969,7 +969,11 @@ def PAR_Verify(parfile, parfile_nzf, nzo, setname, joinables, classic=False, sin
     if single or len(globber(wildcard, None)) < 2:
         # Support bizarre naming conventions
         wildcard = os.path.join(os.path.split(parfile)[0], '*')
-    command.append(wildcard)
+    if sabnzbd.WIN32 or sabnzbd.DARWIN:
+        command.append(wildcard)
+    else:
+        flist = [item for item in globber(wildcard, None) if os.path.isfile(item)]
+        command.extend(flist)
 
     stup, need_shell, command, creationflags = build_command(command)
     logging.debug('Starting par2: %s', command)
@@ -1517,7 +1521,7 @@ def crc_check(path, target_crc):
 
 def analyse_show(name):
     """ Do a quick SeasonSort check and return basic facts """
-    job = SeriesSorter(name, None, None)
+    job = SeriesSorter(None, name, None, None)
     job.match(force=True)
     if job.is_match():
         job.get_values()

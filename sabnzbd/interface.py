@@ -540,12 +540,19 @@ class NzoPage(object):
                 cat = pnfo[PNFO_EXTRA_FIELD1]
                 if not cat:
                     cat = 'None'
-                filename = xml_name(nzo.final_name_pw_clean)
+                filename_pw = xml_name(nzo.final_name_pw_clean)
+                filename = xml_name(nzo.final_name)
+                if nzo.password:
+                    password = xml_name(nzo.password)
+                else:
+                    password = ''
                 priority = pnfo[PNFO_PRIORITY_FIELD]
 
                 slot['nzo_id'] =  str(nzo_id)
                 slot['cat'] = cat
-                slot['filename'] = filename
+                slot['filename'] = filename_pw
+                slot['filename_clean'] = filename
+                slot['password'] = password or ''
                 slot['script'] = script
                 slot['priority'] = str(priority)
                 slot['unpackopts'] = str(unpackopts)
@@ -593,6 +600,7 @@ class NzoPage(object):
     def save_details(self, nzo_id, args, kwargs):
         index = kwargs.get('index', None)
         name = kwargs.get('name', None)
+        password = kwargs.get('password', None)
         pp = kwargs.get('pp', None)
         script = kwargs.get('script', None)
         cat = kwargs.get('cat', None)
@@ -602,7 +610,7 @@ class NzoPage(object):
         if index != None:
             NzbQueue.do.switch(nzo_id, index)
         if name != None:
-            NzbQueue.do.change_name(nzo_id, special_fixer(name))
+            NzbQueue.do.change_name(nzo_id, special_fixer(name), password)
         if cat != None:
             NzbQueue.do.change_cat(nzo_id,cat)
         if script != None:
@@ -1050,7 +1058,6 @@ class ConfigPage(object):
         for svr in config.get_servers():
             new[svr] = {}
         conf['servers'] = new
-        conf['news_items'] = cfg.news_items()
 
         conf['folders'] = sabnzbd.nzbqueue.scan_jobs(all=False, action=False)
 
@@ -1221,11 +1228,11 @@ class ConfigSwitches(object):
 SPECIAL_BOOL_LIST = \
             ( 'start_paused', 'no_penalties', 'ignore_wrong_unrar', 'create_group_folders',
               'queue_complete_pers', 'api_warnings', 'allow_64bit_tools', 'par2_multicore',
-              'never_repair', 'allow_streaming', 'ignore_unrar_dates', 'rss_filenames', 'news_items',
+              'never_repair', 'allow_streaming', 'ignore_unrar_dates', 'rss_filenames',
               'osx_menu', 'osx_speed', 'win_menu', 'uniconfig', 'use_pickle', 'allow_incomplete_nzb',
               'randomize_server_ip', 'no_ipv6', 'keep_awake', 'overwrite_files', 'empty_postproc',
-              'web_watchdog', 'wait_for_dfolder', 'warn_empty_nzb', 'enable_recursive', 'sanitize_safe'
-
+              'web_watchdog', 'wait_for_dfolder', 'warn_empty_nzb', 'enable_recursive', 'sanitize_safe',
+              'enable_meta'
             )
 SPECIAL_VALUE_LIST = \
             ( 'size_limit', 'folder_max_length', 'fsys_type', 'movie_rename_limit', 'nomedia_marker',
