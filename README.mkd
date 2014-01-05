@@ -1,16 +1,22 @@
-Release Notes  -  SABnzbd 0.7.16
-================================
+Release Notes  -  SABnzbd 0.7.17Beta3
+=====================================
 
+## Solved since Beta1/2
+- passwords embedded in file names were not passed properly to unrar
+
+## Features
+
+- Support for more meta-data in NZB files (to be used in TV Sort)
+- Optional integration with the OZnzb indexer, allows user access to ratings and reporting directly from SABnzbd interface.
+- Optional automatic feedback to OZnzb on failed downloads
+- Commandline option --pidfile to set your own PID-file name/path (Unix and OSX)
+- Basic support for X-DNZB-Failure and X-DNZB-Details headers, sent by some indexers
+- Upgrade embedded unrar to 5.01
 
 ## Bug fixes
 - Fix false encryption alarms for some posts
-- Fix for faulty par2cmdline on some embbeded Unix systems
-
-## Features
-- Add "password" box to Plush's job details page
-- Add special "sanitize_safe" to remove unsupported Windows characters on other platforms.
-  This solves issues when using NAS shares from Windows.
-
+- Fix issue with OSX Mavericks Notification Center support
+- Fix issue with passwords embedded in file names
 
 ## What's new in 0.7.0
 
