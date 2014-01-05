@@ -377,6 +377,10 @@ class NzbQueue(TryList):
 
         if cfg.auto_sort():
             self.sort_by_avg_age()
+
+        if sabnzbd.downloader.Downloader.do:
+            sabnzbd.downloader.Downloader.do.resume()
+
         return nzo.nzo_id
 
     @synchronized(NZBQUEUE_LOCK)
