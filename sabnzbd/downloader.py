@@ -347,6 +347,10 @@ class Downloader(Thread):
         # Kick BPS-Meter to check quota
         BPSMeter.do.update()
 
+        #jack hack - auto resume on startup if queue not empty
+        if not NzbQueue.do.is_empty():
+            self.resume()
+
         while 1:
             for server in self.servers:
                 assert isinstance(server, Server)
