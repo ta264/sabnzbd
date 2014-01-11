@@ -375,9 +375,6 @@ class Downloader(Thread):
 
                 assert isinstance(server, Server)
 
-                if self.status_waiting:
-                    self.poll_resume()
-
                 if not server.idle_threads or server.restart or self.is_paused() or self.shutdown or self.delayed or self.postproc:
                     continue
 
@@ -476,6 +473,8 @@ class Downloader(Thread):
                 CV.acquire()
                 while (NzbQueue.do.is_empty() or self.is_paused() or self.delayed or self.postproc) and not \
                        self.shutdown and not self.__restart:
+                    if self.status_waiting:
+                        self.poll_resume()
                     CV.wait()
                 CV.release()
 
