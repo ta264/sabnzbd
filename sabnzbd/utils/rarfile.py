@@ -42,6 +42,7 @@ _use_extract_hack = 0
 #
 
 RAR_ID = "Rar!\x1a\x07\x00"
+RAR5_ID = "Rar!\x1a\x07\x01\x00"
 
 # block types
 RAR_BLOCK_MARK          = 0x72 # r
@@ -108,8 +109,8 @@ RAR_OS_UNIX  = 3
 def is_rarfile(fn):
     '''Check quickly whether file is rar archive.'''
     try:
-        buf = open(fn, "rb").read(len(RAR_ID))
-        return buf == RAR_ID
+        buf = open(fn, "rb").read(50)
+        return buf.startswith(RAR_ID) or buf.startswith(RAR5_ID)
     except:
         return False
 

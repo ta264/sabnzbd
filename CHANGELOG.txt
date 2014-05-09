@@ -1,4 +1,32 @@
 -------------------------------------------------------------------------------
+ 0.7.17Final by The SABnzbd-Team
+-------------------------------------------------------------------------------
+- Implement "retry-after" header to support rate-limiting
+- Update OSX image to show Mavericks support
+-------------------------------------------------------------------------------
+ 0.7.17RC2 by The SABnzbd-Team
+-------------------------------------------------------------------------------
+- Support UNC paths in Sort expressions (Windows)
+- URL in the queue should not show up "sanitized"
+- Fix shutdown issue in PP queue
+- Allow "Force" to be set as priority in files overview
+- Special option "warn_dupl_jobs" to suppress/enable warnings for duplicate jobs
+- Fix problem with "sanitize" in "renamer"
+- Add (partial) RAR5 support
+- Fix some more password-in-filename issues
+- Prevent unwanted change of queue order after editing job details
+- Add password entry boxes in smpl and Classic skins
+- Prevent unrar zombies on some systems
+-------------------------------------------------------------------------------
+ 0.7.17RC1 by The SABnzbd-Team
+-------------------------------------------------------------------------------
+- Fix bug in rating system
+- Fix multiple encryption password issues
+- Allow Default category to be picked in Multi-Ops
+- Allow "force" prio to be picked in NZO page
+- Prevent PP queue timeout construction from keeping the CPU awake.
+- Special option "flat_unpack"
+-------------------------------------------------------------------------------
  0.7.17Beta2 by The SABnzbd-Team
 -------------------------------------------------------------------------------
 - Fix regression errors in Beta1

@@ -94,6 +94,7 @@ enable_par_cleanup = OptionBool('misc', 'enable_par_cleanup', True)
 never_repair = OptionBool('misc', 'never_repair', False)
 ignore_unrar_dates = OptionBool('misc', 'ignore_unrar_dates', False)
 overwrite_files = OptionBool('misc', 'overwrite_files', False)
+flat_unpack = OptionBool('misc', 'flat_unpack', False)
 
 par_option = OptionStr('misc', 'par_option', '', validation=no_nonsense)
 nice = OptionStr('misc', 'nice',  '', validation=no_nonsense)
@@ -213,6 +214,9 @@ web_color2 = OptionStr('misc', 'web_color2')
 cleanup_list = OptionList('misc', 'cleanup_list')
 warned_old_queue = OptionBool('misc', 'warned_old_queue', False)
 
+unwanted_extensions = OptionList('misc', 'unwanted_extensions')
+action_on_unwanted_extensions = OptionNumber('misc', 'action_on_unwanted_extensions', 0)
+
 log_web = OptionBool('logging', 'enable_cherrypy_logging', False)
 log_dir = OptionDir('misc', 'log_dir', 'logs', validation=validate_notempty)
 log_level = OptionNumber('logging', 'log_level', 1, -1, 2)
@@ -268,6 +272,7 @@ wait_ext_drive = OptionNumber('misc', 'wait_ext_drive', 5, 1, 60)
 history_limit = OptionNumber('misc', 'history_limit', 50, 0)
 show_sysload = OptionNumber('misc', 'show_sysload', 2, 0, 2)
 web_watchdog = OptionBool('misc', 'web_watchdog', False)
+warn_dupl_jobs = OptionBool('misc', 'warn_dupl_jobs', True)
 
 #------------------------------------------------------------------------------
 # Set root folders for Folder config-items

@@ -658,6 +658,12 @@ def _api_resume_pp(name, output, kwargs):
     return report(output)
 
 
+def _api_pause_pp(name, output, kwargs):
+    """ API: accepts output """
+    PostProcessor.do.paused = True
+    return report(output)
+
+
 def _api_rss_now(name, output, kwargs):
     """ API: accepts output """
     # Run RSS scan async, because it can take a long time
@@ -676,7 +682,8 @@ def _api_test_email(name, output, kwargs):
     pack['unpack'] = ['action 1', 'action 2']
     res = sabnzbd.emailer.endjob('I had a d\xe8ja vu', 123, 'unknown', True,
                                  os.path.normpath(os.path.join(cfg.complete_dir.get_path(), '/unknown/I had a d\xe8ja vu')),
-                                 123*MEBI, None, pack, 'my_script', 'Line 1\nLine 2\nLine 3\nd\xe8ja vu\n', 0)
+                                 123*MEBI, None, pack, 'my_script', 'Line 1\nLine 2\nLine 3\nd\xe8ja vu\n', 0,
+                                 test=kwargs)
     if res == 'Email succeeded':
         res = None
     return report(output, error=res)
@@ -684,7 +691,7 @@ def _api_test_email(name, output, kwargs):
 def _api_test_notif(name, output, kwargs):
     """ API: send a test notification, return result """
     logging.info("Sending test notification")
-    res = sabnzbd.growler.send_notification('SABnzbd', T('Test Notification'), 'other', wait=True)
+    res = sabnzbd.growler.send_notification('SABnzbd', T('Test Notification'), 'other', wait=True, test=kwargs)
     return report(output, error=res)
 
 def _api_undefined(name, output, kwargs):
@@ -822,6 +829,7 @@ _api_table = {
     'eval_sort'       : _api_eval_sort,
     'watched_now'     : _api_watched_now,
     'resume_pp'       : _api_resume_pp,
+    'pause_pp'        : _api_pause_pp,
     'rss_now'         : _api_rss_now,
     'browse'          : _api_browse,
     'reset_quota'     : _api_reset_quota,
@@ -1788,7 +1796,10 @@ def build_history(start=None, limit=None, verbose=False, verbose_list=None, sear
         if item['retry']:
             retry_folders.append(path)
 
-        rating = Rating.do.get_rating_by_nzo(item['nzo_id'])
+        if Rating.do:
+            rating = Rating.do.get_rating_by_nzo(item['nzo_id'])
+        else:
+            rating = None
         item['has_rating'] = rating is not None
         if rating:
             item['rating_avg_video'] = rating.avg_video

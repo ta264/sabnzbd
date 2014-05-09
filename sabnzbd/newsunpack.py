@@ -94,7 +94,7 @@ def find_programs(curdir):
 
     if sabnzbd.DARWIN:
         try:
-            os_version = subprocess.Popen("sw_vers -productVersion", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).stdout.read()
+            os_version = run_simple('sw_vers -productVersion')
             #par2-sl from Macpar Deluxe 4.1 is only 10.6 and later
             if int(os_version.split('.')[1]) >= 6:
                 sabnzbd.newsunpack.PAR2_COMMAND = check(curdir, 'osx/par2/par2-sl')
@@ -476,20 +476,24 @@ def rar_extract(rarfile, numrars, one_folder, nzo, setname, extraction_path):
     new_files = None
     rars = []
     if nzo.password:
-        passwords = [nzo.password]
+        logging.info('Got a password set by user')
+        passwords = [nzo.password.strip()]
     else:
         passwords = []
         # Append meta passwords, to prevent changing the original list
         passwords.extend(nzo.meta.get('password', []))
+        if passwords:
+            logging.info('Read %s passwords from meta data in NZB', len(passwords))
         pw_file = cfg.password_file.get_path()
         if pw_file:
             try:
                 pwf = open(pw_file, 'r')
                 lines = pwf.read().split('\n')
                 # Remove empty lines and space-only passwords and remove surrounding spaces
-                passwords.extend([pw.strip('\r\n ') for pw in lines if pw.strip('\r\n ')])
+                pws = [pw.strip('\r\n ') for pw in lines if pw.strip('\r\n ')]
+                passwords.extend(pws)
                 pwf.close()
-                logging.info('Read the passwords file %s', pw_file)
+                logging.info('Read %s passwords from file %s', len(pws), pw_file)
             except IOError:
                 logging.info('Failed to read the passwords file %s', pw_file)
 
@@ -540,7 +544,7 @@ def rar_extract_core(rarfile, numrars, one_folder, nzo, setname, extraction_path
 
     ############################################################################
 
-    if one_folder:
+    if one_folder or cfg.flat_unpack():
         action = 'e'
     else:
         action = 'x'
@@ -642,10 +646,12 @@ def rar_extract_core(rarfile, numrars, one_folder, nzo, setname, extraction_path
             nzo.set_unpack_info('Unpack', unicoder(msg), set=setname)
             fail = 1
 
-        elif 'ncrypted file' in line and (('CRC failed' in line) or ('Checksum error' in line)):
+        elif 'The specified password is incorrect' in line or \
+             ('ncrypted file' in line and (('CRC failed' in line) or ('Checksum error' in line))):
             # unrar 3.x: "Encrypted file: CRC failed in oLKQfrcNVivzdzSG22a2xo7t001.part1.rar (password incorrect ?)"
             # unrar 4.x: "CRC failed in the encrypted file oLKQfrcNVivzdzSG22a2xo7t001.part1.rar. Corrupt file or wrong password."
             # unrar 5.x: "Checksum error in the encrypted file oLKQfrcNVivzdzSG22a2xo7t001.part1.rar. Corrupt file or wrong password."
+            # unrar 5.01 : "The specified password is incorrect."
             m = re.search('encrypted file (.+)\. Corrupt file', line)
             if not m:
                 # unrar 3.x syntax
@@ -653,7 +659,7 @@ def rar_extract_core(rarfile, numrars, one_folder, nzo, setname, extraction_path
             if m:
                 filename = TRANS(m.group(1)).strip()
             else:
-                filename = '???'
+                filename = os.path.split(rarfile)[1]
             nzo.fail_msg = T('Unpacking failed, archive requires a password')
             msg = ('[%s][%s] '+Ta('Unpacking failed, archive requires a password')) % (setname, latin1(filename))
             nzo.set_unpack_info('Unpack', unicoder(msg), set=setname)
@@ -788,7 +794,7 @@ def unzip(nzo, workdir, workdir_complete, delete, one_folder, zips):
 def ZIP_Extract(zipfile, extraction_path, one_folder):
     """ Unzip single zip set 'zipfile' to 'extraction_path'
     """
-    if one_folder:
+    if one_folder or cfg.flat_unpack():
         option = '-j'  # Unpack without folders
     else:
         option = '-qq' # Dummy option
@@ -1461,7 +1467,7 @@ def unrar_check(rar):
     """ Return True if correct version of unrar is found """
     if rar:
         try:
-            version = subprocess.Popen(rar, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).stdout.read()
+            version = run_simple(rar)
         except:
             return False
         m = re.search("RAR\s(\d+)\.(\d+)\s+.*Alexander Roshal", version)
@@ -1625,3 +1631,13 @@ def get_from_url(url, timeout=None):
         except:
             output = None
     return output
+
+
+#------------------------------------------------------------------------------
+def run_simple(cmd):
+    """ Run simple external command and return output
+    """
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    txt = p.stdout.read()
+    p.wait()
+    return txt

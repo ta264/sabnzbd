@@ -186,7 +186,9 @@ class NzbQueue(TryList):
         from sabnzbd.dirscanner import ProcessSingleFile
         res, nzo_ids = ProcessSingleFile(nzo.work_name + '.nzb', nzb_path, reuse=True)
         if res == 0 and nzo_ids:
-            self.replace_in_q(nzo, nzo_ids[0])
+            nzo = self.replace_in_q(nzo, nzo_ids[0])
+            # Reset reuse flag to make pause/abort on encryption possible
+            nzo.reuse = False
 
 
     @synchronized(NZBQUEUE_LOCK)
@@ -200,10 +202,11 @@ class NzbQueue(TryList):
             self.__nzo_list.pop(pos)
             del self.__nzo_table[nzo.nzo_id]
             del nzo
+            return new_nzo
         except:
             logging.error('Failed to restart NZB after pre-check (%s)', nzo.nzo_id)
             logging.info("Traceback: ", exc_info = True)
-            return
+            return nzo
 
     @synchronized(NZBQUEUE_LOCK)
     def save(self, save_nzo=None):
@@ -299,13 +302,14 @@ class NzbQueue(TryList):
                 self.__nzo_table[nzo_id].script = script
 
     @synchronized(NZBQUEUE_LOCK)
-    def change_cat(self, nzo_ids, cat):
+    def change_cat(self, nzo_ids, cat, explicit_priority=None):
         for nzo_id in [item.strip() for item in nzo_ids.split(',')]:
             if nzo_id in self.__nzo_table:
                 nzo = self.__nzo_table[nzo_id]
                 nzo.cat, pp, nzo.script, prio = cat_to_opts(cat)
                 nzo.set_pp(pp)
-                self.set_priority(nzo_id, prio)
+                if explicit_priority is None:
+                    self.set_priority(nzo_id, prio)
 
     @synchronized(NZBQUEUE_LOCK)
     def change_name(self, nzo_id, name, password=None):

@@ -544,7 +544,7 @@ class NzoPage(object):
                 filename_pw = xml_name(nzo.final_name_pw_clean)
                 filename = xml_name(nzo.final_name)
                 if nzo.password:
-                    password = xml_name(nzo.password)
+                    password = xml_name(nzo.password).replace('"', '&quot;')
                 else:
                     password = ''
                 priority = pnfo[PNFO_PRIORITY_FIELD]
@@ -613,7 +613,7 @@ class NzoPage(object):
         if name != None:
             NzbQueue.do.change_name(nzo_id, special_fixer(name), password)
         if cat != None:
-            NzbQueue.do.change_cat(nzo_id,cat)
+            NzbQueue.do.change_cat(nzo_id, cat, priority)
         if script != None:
             NzbQueue.do.change_script(nzo_id,script)
         if pp != None:
@@ -1211,7 +1211,8 @@ SWITCH_LIST = \
              'unpack_check', 'quota_size', 'quota_day', 'quota_resume', 'quota_period',
              'pre_check', 'max_art_tries', 'max_art_opt', 'fail_hopeless',
              'rating_enable', 'rating_api_key', 'rating_host', 'rating_feedback',
-             'status_person', 'status_url'
+             'status_person', 'status_url',
+             'unwanted_extensions', 'action_on_unwanted_extensions'
              )
 
 #------------------------------------------------------------------------------
@@ -1234,6 +1235,7 @@ class ConfigSwitches(object):
 
         for kw in SWITCH_LIST:
             conf[kw] = config.get_config('misc', kw)()
+        conf['unwanted_extensions'] = cfg.unwanted_extensions.get_string()
 
         conf['script_list'] = list_scripts() or ['None']
         conf['have_ampm'] = HAVE_AMPM
@@ -1250,6 +1252,8 @@ class ConfigSwitches(object):
         for kw in SWITCH_LIST:
             item = config.get_config('misc', kw)
             value = platform_encode(kwargs.get(kw))
+            if kw == 'unwanted_extensions' and value:
+                value = value.lower().replace('.', '')
             msg = item.set(value)
             if msg:
                 return badParameterResponse(msg)
@@ -1267,7 +1271,7 @@ SPECIAL_BOOL_LIST = \
               'osx_menu', 'osx_speed', 'win_menu', 'uniconfig', 'use_pickle', 'allow_incomplete_nzb',
               'randomize_server_ip', 'no_ipv6', 'keep_awake', 'overwrite_files', 'empty_postproc',
               'web_watchdog', 'wait_for_dfolder', 'warn_empty_nzb', 'enable_recursive', 'sanitize_safe',
-              'enable_meta'
+              'enable_meta', 'flat_unpack', 'warn_dupl_jobs'
             )
 SPECIAL_VALUE_LIST = \
             ( 'size_limit', 'folder_max_length', 'fsys_type', 'movie_rename_limit', 'nomedia_marker',

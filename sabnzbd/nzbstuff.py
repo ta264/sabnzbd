@@ -36,7 +36,7 @@ except ImportError:
 import sabnzbd
 from sabnzbd.constants import sample_match, GIGI, ATTRIB_FILE, JOB_ADMIN, \
                               DEFAULT_PRIORITY, LOW_PRIORITY, NORMAL_PRIORITY, \
-                              HIGH_PRIORITY, PAUSED_PRIORITY, TOP_PRIORITY, DUP_PRIORITY, \
+                              HIGH_PRIORITY, PAUSED_PRIORITY, TOP_PRIORITY, DUP_PRIORITY, REPAIR_PRIORITY, \
                               RENAMES_FILE, Status
 from sabnzbd.misc import to_units, cat_to_opts, cat_convert, sanitize_foldername, \
                          get_unique_path, get_admin_path, remove_all, format_source_url, \
@@ -533,7 +533,8 @@ NzbObjectMapper = (
     ('precheck',                     'precheck'),
     ('incomplete',                   'incomplete'),    # Was detected as incomplete
     ('reuse',                        'reuse'),
-    ('meta',                         'meta')           # Meta-date from 1.1 type NZB
+    ('meta',                         'meta'),          # Meta-date from 1.1 type NZB
+    ('unwanted_ext',                 'unwanted_ext')
 )
 
 class NzbObject(TryList):
@@ -545,7 +546,6 @@ class NzbObject(TryList):
 
         filename = platform_encode(filename)
         nzbname = platform_encode(nzbname)
-        nzbname = sanitize_foldername(nzbname)
 
         if pp is None:
             r = u = d = None
@@ -563,8 +563,9 @@ class NzbObject(TryList):
             dname, ext = os.path.splitext(work_name) # Used for folder name for final unpack
             if ext.lower() == '.nzb':
                 work_name = dname
-            work_name = sanitize_foldername(work_name)
         work_name, password = scan_password(work_name)
+        if nzb and work_name:
+            work_name = sanitize_foldername(work_name)
 
         self.work_name = work_name
         self.final_name = work_name
@@ -621,6 +622,7 @@ class NzbObject(TryList):
         self.oversized = False
         self.precheck = False
         self.incomplete = False
+        self.unwanted_ext = False
         self.reuse = reuse
         if self.status == Status.QUEUED and not reuse:
             self.precheck = cfg.pre_check()
@@ -674,7 +676,8 @@ class NzbObject(TryList):
         adir = os.path.join(wdir, JOB_ADMIN)
 
         # Duplicate checking, needs to be done before the backup
-        duplicate = (not reuse) and nzb and dup_check and sabnzbd.backup_exists(filename)
+        duplicate = (not reuse) and nzb and dup_check and sabnzbd.backup_exists(filename) \
+                    and priority != REPAIR_PRIORITY
 
         if reuse:
             remove_all(adir, 'SABnzbd_nz?_*')
@@ -802,12 +805,12 @@ class NzbObject(TryList):
             self.priority = LOW_PRIORITY
 
         if duplicate and cfg.no_dupes() == 1:
-            logging.warning(Ta('Ignoring duplicate NZB "%s"'), filename)
+            if cfg.warn_dupl_jobs(): logging.warning(Ta('Ignoring duplicate NZB "%s"'), filename)
             self.purge_data(keep_basic=False)
             raise TypeError
 
         if duplicate or self.priority == DUP_PRIORITY:
-            logging.warning(Ta('Pausing duplicate NZB "%s"'), filename)
+            if cfg.warn_dupl_jobs(): logging.warning(Ta('Pausing duplicate NZB "%s"'), filename)
             self.duplicate = True
             self.pause()
             self.priority = NORMAL_PRIORITY
@@ -1036,30 +1039,31 @@ class NzbObject(TryList):
             prefix += Ta('TOO LARGE') + ' / ' #: Queue indicator for oversized job
         if self.incomplete and self.status == 'Paused':
             prefix += Ta('INCOMPLETE') + ' / ' #: Queue indicator for incomplete NZB
+        if self.unwanted_ext and self.status == 'Paused':
+            prefix += Ta('UNWANTED') + ' / ' #: Queue indicator for unwanted extensions
         if isinstance(self.wait, float):
             dif = int(self.wait - time.time() + 0.5)
             if dif > 0:
                 prefix += Ta('WAIT %s sec') % dif + ' / ' #: Queue indicator for waiting URL fetch
         if self.password:
-            return '%s%s / %s' % (name_fixer(prefix), self.final_name, self.password)
+            return '%s%s/%s' % (name_fixer(prefix), self.final_name, self.password)
         else:
             return '%s%s' % (name_fixer(prefix), self.final_name)
 
     @property
     def final_name_pw_clean(self):
         if self.password:
-            return '%s / %s' % (self.final_name, self.password)
+            return '%s/%s' % (self.final_name, self.password)
         else:
             return self.final_name
 
     def set_final_name_pw(self, name, password=None):
         if isinstance(name, str):
-            if password:
+            if password is not None:
                 name = platform_encode(name)
                 self.password = platform_encode(password)
             else:
-                name, password = scan_password(platform_encode(name))
-                self.password = self.password or password
+                name, self.password = scan_password(platform_encode(name))
             self.final_name = sanitize_foldername(name)
             self.save_to_disk()
 
@@ -1074,10 +1078,11 @@ class NzbObject(TryList):
         if self.encrypted:
             # If user resumes after encryption warning, no more auto-pauses
             self.encrypted = 2
-        # If user resumes after warning, reset duplicate/oversized/incomplete indicators
+        # If user resumes after warning, reset duplicate/oversized/incomplete/unwanted indicators
         self.duplicate = False
         self.oversized = False
         self.incomplete = False
+        self.unwanted_ext = False
 
     def add_parfile(self, parfile):
         if parfile not in self.files:

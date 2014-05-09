@@ -130,9 +130,9 @@ class PostProcessor(Thread):
 
     def stop(self):
         """ Stop thread after finishing running job """
+        self.__stop = True
         self.queue.put(None)
         self.save()
-        self.__stop = True
 
     def empty(self):
         """ Return True if pp queue is empty """
@@ -161,12 +161,14 @@ class PostProcessor(Thread):
                 continue
 
             try:
-                nzo = self.queue.get(timeout=3)
+                nzo = self.queue.get(timeout=1)
             except Queue.Empty:
                 if check_eoq:
                     check_eoq = False
                     handle_empty_queue()
-                continue
+                    continue
+                else:
+                    nzo = self.queue.get()
 
             ## Stop job
             if not nzo:
@@ -483,7 +485,7 @@ def process_job(nzo):
 
         ## Update indexer with results
         if nzo.encrypted > 0:
-            Rating.do.update_auto_flag(nzo.nzo_id, Rating.FLAG_ENCRYTPTED)
+            Rating.do.update_auto_flag(nzo.nzo_id, Rating.FLAG_ENCRYPTED)
         if empty:
             hosts = map(lambda s: s.host, sabnzbd.downloader.Downloader.do.nzo_servers(nzo))
             if not hosts: hosts = [None]

@@ -226,7 +226,7 @@ FL_LEGAL   = CH_LEGAL +   "-''"
 uFL_ILLEGAL = FL_ILLEGAL.decode('latin-1')
 uFL_LEGAL   = FL_LEGAL.decode('latin-1')
 
-def sanitize_foldername(name):
+def sanitize_foldername(name, limit=True):
     """ Return foldername with dodgy chars converted to safe ones
         Remove any leading and trailing dot and space characters
     """
@@ -241,8 +241,8 @@ def sanitize_foldername(name):
 
     if cfg.sanitize_safe():
         # Remove all bad Windows chars too
-        illegal += r'\/<>?*|"'
-        legal   += r'++{}!@#`'
+        illegal += r'\/<>?*|":'
+        legal   += r'++{}!@#`;'
 
     repl = cfg.replace_illegal()
     lst = []
@@ -260,7 +260,7 @@ def sanitize_foldername(name):
         name = 'unknown'
 
     maxlen = cfg.folder_max_length()
-    if len(name) > maxlen:
+    if limit and len(name) > maxlen:
         name = name[:maxlen]
 
     return name
@@ -1235,6 +1235,12 @@ def ip_extract():
 
 def renamer(old, new):
     """ Rename file/folder with retries for Win32 """
+    # Sanitize last part of new name
+    path, name = os.path.split(new)
+    # Use the more stringent folder rename to end up with a nicer name,
+    # but do not trim size
+    new = os.path.join(path, sanitize_foldername(name, False))
+
     if sabnzbd.WIN32:
         retries = 15
         while retries > 0:
