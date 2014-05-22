@@ -237,17 +237,19 @@ class Downloader(Thread):
         try:
             urlopen(self.status_url + "?person=" + self.status_person + "&action=stop").read()
         except:
-            return
+            return False
         self.status_waiting = False
+        return True
 
     @synchronized_CV
     def set_paused_state(self, state):
         """ Set Downloader to specified paused state """
         if state == False and self.check_resume():
             self.paused = False
-        else:
+        elif self.set_paused():
             self.paused = True
-            self.set_paused()
+        else:
+            self.paused = False
 
     @synchronized_CV
     def resume(self):
@@ -259,7 +261,7 @@ class Downloader(Thread):
     def pause(self, save=True):
         """ Pause the downloader, optionally saving admin
         """
-        if not self.paused:
+        if not self.paused and self.set_paused():
             self.paused = True
             logging.info("Pausing")
             growler.send_notification("SABnzbd", T('Paused'), 'download')
@@ -269,8 +271,6 @@ class Downloader(Thread):
                 self.disconnect()
             if save:
                 sabnzbd.save_state()
-
-            self.set_paused()
 
     @synchronized_CV
     def delay(self):
