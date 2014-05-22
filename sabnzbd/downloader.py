@@ -211,7 +211,10 @@ class Downloader(Thread):
         return primary
 
     def check_resume(self):
-        result = urlopen(self.status_url + "?person=" + self.status_person + "&action=nzbadd").read()
+        try:
+            result = urlopen(self.status_url + "?person=" + self.status_person + "&action=nzbadd").read()
+        except:
+            return False
 
         if result == "ok":      #we can start downloading
             logging.info("Resuming - status ok")
@@ -231,7 +234,10 @@ class Downloader(Thread):
 
     def set_paused(self):
         logging.info("Setting status to paused")
-        urlopen(self.status_url + "?person=" + self.status_person + "&action=stop").read()
+        try:
+            urlopen(self.status_url + "?person=" + self.status_person + "&action=stop").read()
+        except:
+            return
         self.status_waiting = False
 
     @synchronized_CV
