@@ -237,6 +237,7 @@ class Downloader(Thread):
         try:
             urlopen(self.status_url + "?person=" + self.status_person + "&action=stop").read()
         except:
+            logging.info("Failed to set status to paused!")
             return False
         self.status_waiting = False
         return True
@@ -452,6 +453,10 @@ class Downloader(Thread):
 
                     for server in self.servers:
                         server.stop(self.read_fds, self.write_fds)
+
+                    # Set update status to paused
+                    # If it fails will just shut down anyway.
+                    self.set_paused()
 
                     logging.info("Shutting down")
                     break
