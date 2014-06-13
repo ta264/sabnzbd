@@ -168,6 +168,7 @@ def sig_handler(signum = None, frame = None):
         return True
     if type(signum) != type(None):
         logging.warning(Ta('Signal %s caught, saving and exiting...'), signum)
+        Downloader.do.pause()
     try:
         save_state(flag=True)
     finally:
