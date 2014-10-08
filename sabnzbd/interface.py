@@ -2588,7 +2588,7 @@ def GetRssLog(feed):
         if sabnzbd.rss.special_rss_site(url):
             nzbname = ""
         else:
-            nzbname = xml_name(sanitize_foldername(job.get('title', '')))
+            nzbname = xml_name(job.get('title', ''))
         return url, \
                title, \
                '*' * int(job.get('status', '').endswith('*')), \
@@ -2605,7 +2605,7 @@ def GetRssLog(feed):
 
     # Sort in reverse order of time stamp for 'Done'
     dnames = [job for job in jobs.keys() if jobs[job]['status'] == 'D']
-    dnames.sort(lambda x, y: jobs[y].get('time', 0) - jobs[x].get('time', 0))
+    dnames.sort(lambda x, y: int(jobs[y].get('time', 0) - jobs[x].get('time', 0)))
     done = [xml_name(jobs[job]['title']) for job in dnames]
 
 
